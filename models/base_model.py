@@ -9,9 +9,7 @@ import math
 import torch.nn.functional as F
 import sys
 import numpy as np
-# sys.path.append("/hdd/xrj/RGB-NIR/codeali4")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data.degrade.process import demosaic
 
 class BaseModel(ABC):
     def __init__(self, opt):
@@ -148,82 +146,7 @@ class BaseModel(ABC):
 
         return visual_ret
 
-    def post_process(self, image, max=255):
-        image = image.permute(0,2,3,1)
-        image = demosaic(image)
-        image = image.clamp(0.0, 1.0)**(1/2.2)
-        # print('b', torch.max(image), torch.min(image))
-        if max == 255:
-            image = torch.clamp(image*255, 0, 255).round()
-        image = image.permute(0,3,1,2)
-        # print('a', torch.max(image), torch.min(image))
-        return image
 
-    def flatten_raw_image(self, im_raw_4ch):  # 4xHxW
-        """ unpack a 4-channel tensor into a single channel bayer image"""
-        if isinstance(im_raw_4ch, np.ndarray):
-            im_out = np.zeros_like(im_raw_4ch, shape=(im_raw_4ch.shape[0], im_raw_4ch.shape[1] // 4, im_raw_4ch.shape[2] * 2, im_raw_4ch.shape[3] * 2))
-        elif isinstance(im_raw_4ch, torch.Tensor):
-            im_out = torch.zeros((im_raw_4ch.shape[0], im_raw_4ch.shape[1] // 4, im_raw_4ch.shape[2] * 2, im_raw_4ch.shape[3] * 2), dtype=im_raw_4ch.dtype)
-        else:
-            raise Exception
-
-        im_out[..., 0::2, 0::2] = im_raw_4ch[..., 0, :, :]
-        im_out[..., 0::2, 1::2] = im_raw_4ch[..., 1, :, :]
-        im_out[..., 1::2, 0::2] = im_raw_4ch[..., 2, :, :]
-        im_out[..., 1::2, 1::2] = im_raw_4ch[..., 3, :, :]
-
-        return im_out  # HxW
-
-    def post_process_test(self, image, max=255):
-        image = image.permute(0,2,3,1)
-        # red
-        image[...,0] = image[...,0] * 1.5
-        # blue
-        image[...,3] = image[...,3] * 2
-        image = demosaic(image)
-        image = image.clamp(0.0, 1.0)**(1/2.2)
-        # print('b', torch.max(image), torch.min(image))
-        if max == 255:
-            image = torch.clamp(image*255, 0, 255).round()
-        image = image.permute(0,3,1,2)
-        # print('a', torch.max(image), torch.min(image))
-        return image
-
-    def get_current_visuals_raw(self):
-        visual_ret = OrderedDict()
-        if self.isTrain:
-            for name in self.visual_names:
-                # print(name)
-                if name == 'data_out_3ch' or name =='data_out_gray':
-                    visual_ret[name] = torch.clamp(
-                        getattr(self, name).detach()*255, 0, 255).round()
-                    continue
-                if isinstance(getattr(self, name), (list, tuple)):
-                    visual_ret[name] = self.post_process(
-                            getattr(self, name)[0])[0:1].detach()
-                else:	
-                    visual_ret[name] = self.post_process(
-                            getattr(self, name))[0:1].detach()
-        else:
-            for name in self.visual_names:
-                # print(name)
-                if name == 'data_out_3ch' or name =='data_out_gray':
-                    visual_ret[name] = torch.clamp(
-                        getattr(self, name)[0:1].detach()*255, 0, 255).round()
-                    continue
-                if 'ir' in name:
-                    visual_ret[name] = torch.clamp(
-                        self.flatten_raw_image(getattr(self, name)[0:1]).detach()*255, 0, 255).round()
-                    continue
-                if isinstance(getattr(self, name), (list, tuple)):
-                    visual_ret[name] = self.post_process_test(
-                            getattr(self, name)[0])[0:1].detach()
-                else:	
-                    visual_ret[name] = self.post_process_test(
-                            getattr(self, name))[0:1].detach()
-
-        return visual_ret
 
     def get_current_losses(self):
         errors_ret = OrderedDict()
@@ -248,10 +171,6 @@ class BaseModel(ABC):
     def load_networks(self, epoch):
         for name in self.model_names: #[0:1]:
             print(name)
-            # if name is 'STAGEONE':
-            #     continue
-            # if name is 'Discriminator':
-            # 	continue
             load_filename = '%s_model_%d.pth' % (name, epoch)
             if self.opt.load_path != '':
                 load_path = self.opt.load_path
@@ -306,7 +225,6 @@ class BaseModel(ABC):
 
         net_state = net.state_dict()
         is_loaded = {n:False for n in net_state.keys()}
-        # print(state_dict['params'].keys())
         if 'state_dict' in state_dict.keys() or 'params' in state_dict.keys():
             param_keys = 'state_dict' if 'state_dict' in state_dict.keys() else 'params'
             for name, param in state_dict[param_keys].items():
@@ -326,7 +244,6 @@ class BaseModel(ABC):
                     print('Saved parameter named [%s] is skipped' % name)
         else:
             for name, param in state_dict.items():
-                # for name, param in state_dict['params'].items():
                 name = name.replace('module.', '')
                 if name in net_state:
                     try:
@@ -462,69 +379,3 @@ class BaseModel(ABC):
             if net is not None:
                 for param in net.parameters():
                     param.requires_grad = requires_grad
-
-    def estimate(self, tenFirst, tenSecond, net):
-        assert(tenFirst.shape[3] == tenSecond.shape[3])
-        assert(tenFirst.shape[2] == tenSecond.shape[2])
-        intWidth = tenFirst.shape[3]
-        intHeight = tenFirst.shape[2]
-        # tenPreprocessedFirst = tenFirst.view(1, 3, intHeight, intWidth)
-        # tenPreprocessedSecond = tenSecond.view(1, 3, intHeight, intWidth)
-
-        intPreprocessedWidth = int(math.floor(math.ceil(intWidth / 64.0) * 64.0))
-        intPreprocessedHeight = int(math.floor(math.ceil(intHeight / 64.0) * 64.0))
-
-        tenPreprocessedFirst = F.interpolate(input=tenFirst, 
-                                size=(intPreprocessedHeight, intPreprocessedWidth), 
-                                mode='bilinear', align_corners=False)
-        tenPreprocessedSecond = F.interpolate(input=tenSecond, 
-                                size=(intPreprocessedHeight, intPreprocessedWidth), 
-                                mode='bilinear', align_corners=False)
-
-        tenFlow = 20.0 * F.interpolate(
-                         input=net(tenPreprocessedFirst, tenPreprocessedSecond), 
-                         size=(intHeight, intWidth), mode='bilinear', align_corners=False)
-
-        tenFlow[:, 0, :, :] *= float(intWidth) / float(intPreprocessedWidth)
-        tenFlow[:, 1, :, :] *= float(intHeight) / float(intPreprocessedHeight)
-
-        return tenFlow[:, :, :, :]
-    
-    def backwarp(self, tenInput, tenFlow):
-        index = str(tenFlow.shape) + str(tenInput.device)
-        if index not in self.backwarp_tenGrid:
-            tenHor = torch.linspace(-1.0 + (1.0 / tenFlow.shape[3]), 1.0 - (1.0 / tenFlow.shape[3]), 
-                     tenFlow.shape[3]).view(1, 1, 1, -1).expand(-1, -1, tenFlow.shape[2], -1)
-            tenVer = torch.linspace(-1.0 + (1.0 / tenFlow.shape[2]), 1.0 - (1.0 / tenFlow.shape[2]), 
-                     tenFlow.shape[2]).view(1, 1, -1, 1).expand(-1, -1, -1, tenFlow.shape[3])
-            self.backwarp_tenGrid[index] = torch.cat([tenHor, tenVer], 1).to(tenInput.device)
-
-        if index not in self.backwarp_tenPartial:
-            self.backwarp_tenPartial[index] = tenFlow.new_ones([
-                 tenFlow.shape[0], 1, tenFlow.shape[2], tenFlow.shape[3]])
-
-        tenFlow = torch.cat([tenFlow[:, 0:1, :, :] / ((tenInput.shape[3] - 1.0) / 2.0), 
-                             tenFlow[:, 1:2, :, :] / ((tenInput.shape[2] - 1.0) / 2.0)], 1)
-        tenInput = torch.cat([tenInput, self.backwarp_tenPartial[index]], 1)
-
-        tenOutput = F.grid_sample(input=tenInput, 
-                    grid=(self.backwarp_tenGrid[index] + tenFlow).permute(0, 2, 3, 1), 
-                    mode='bilinear', padding_mode='zeros', align_corners=False)
-
-        return tenOutput
-
-    def get_backwarp(self, tenFirst, tenSecond, net, flow=None):
-        if flow is None:
-            flow = self.get_flow(tenFirst, tenSecond, net)
-        
-        tenoutput = self.backwarp(tenSecond, flow) 	
-        tenMask = tenoutput[:, -1:, :, :]
-        tenMask[tenMask > 0.999] = 1.0
-        tenMask[tenMask < 1.0] = 0.0
-        return tenoutput[:, :-1, :, :] * tenMask, tenMask
-
-    def get_flow(self, tenFirst, tenSecond, net):
-        with torch.no_grad():
-            net.eval()
-            flow = self.estimate(tenFirst, tenSecond, net) 
-        return flow
