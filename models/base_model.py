@@ -186,11 +186,9 @@ class BaseModel(ABC):
 
             net_state = net.state_dict()
             is_loaded = {n:False for n in net_state.keys()}
-            for name, param in state_dict['state_dict'].items():
-            # for name, param in state_dict['params'].items():
-                # load dvn_fusion
+            param_keys = 'state_dict' if 'state_dict' in state_dict.keys() else 'params'
+            for name, param in state_dict[param_keys].items():
                 name = name.replace('module.', '')
-                # print(name)
                 if name in net_state:
                     try:
                         net_state[name].copy_(param)
@@ -266,76 +264,6 @@ class BaseModel(ABC):
         if mark:
             print('All parameters are initialized using [%s]' % path)
 
-
-    def load_network_path_naf(self, net, path):
-        if isinstance(net, torch.nn.DataParallel):
-            net = net.module
-        state_dict = torch.load(path, map_location=self.device)
-        print('loading the model from %s' % (path))
-        if hasattr(state_dict, '_metadata'):
-            del state_dict._metadata
-
-        net_state = net.state_dict()
-        is_loaded = {n:False for n in net_state.keys()}
-        # print(state_dict['params'].keys())
-        for name, param in state_dict['state_dict'].items():
-        # for name, param in state_dict['params'].items():
-            name = name.replace('NAF', 'NAFF')
-            if name in net_state:
-                try:
-                    net_state[name].copy_(param)
-                    is_loaded[name] = True
-                except Exception:
-                    print('While copying the parameter named [%s], '
-                            'whose dimensions in the model are %s and '
-                            'whose dimensions in the checkpoint are %s.'
-                            % (name, list(net_state[name].shape),
-                                list(param.shape)))
-                    raise RuntimeError
-            else:
-                print('Saved parameter named [%s] is skipped' % name)
-        mark = True
-        for name in is_loaded:
-            if not is_loaded[name]:
-                print('Parameter named [%s] is randomly initialized' % name)
-                mark = False
-        if mark:
-            print('All parameters are initialized using [%s]' % path)
-
-    def load_network_path_dvn(self, net, path):
-        if isinstance(net, torch.nn.DataParallel):
-            net = net.module
-        state_dict = torch.load(path, map_location=self.device)
-        print('loading the model from %s' % (path))
-        if hasattr(state_dict, '_metadata'):
-            del state_dict._metadata
-
-        net_state = net.state_dict()
-        is_loaded = {n:False for n in net_state.keys()}
-        # print(state_dict['params'].keys())
-        for name, param in state_dict['state_dict'].items():
-        # for name, param in state_dict['params'].items():
-            name = name.replace('module.', '')
-            if name in net_state:
-                try:
-                    net_state[name].copy_(param)
-                    is_loaded[name] = True
-                except Exception:
-                    print('While copying the parameter named [%s], '
-                            'whose dimensions in the model are %s and '
-                            'whose dimensions in the checkpoint are %s.'
-                            % (name, list(net_state[name].shape),
-                                list(param.shape)))
-                    raise RuntimeError
-            else:
-                print('Saved parameter named [%s] is skipped' % name)
-        mark = True
-        for name in is_loaded:
-            if not is_loaded[name]:
-                print('Parameter named [%s] is randomly initialized' % name)
-                mark = False
-        if mark:
-            print('All parameters are initialized using [%s]' % path)
 
     def save_optimizers(self, epoch):
         assert len(self.optimizers) == len(self.optimizer_names)
