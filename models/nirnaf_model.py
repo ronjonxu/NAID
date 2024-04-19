@@ -76,8 +76,8 @@ class GMM(nn.Module):
     def __init__(self, c):
         super().__init__()
 
-        self.conv3_1 = N.conv(c, c, kernel_size=1, padding=0, mode='C')
-        self.conv5_1 = N.conv(c, c, kernel_size=1, padding=0, mode='C')
+        self.conv_rgb = N.conv(c, c, kernel_size=1, padding=0, mode='C')
+        self.conv_nir = N.conv(c, c, kernel_size=1, padding=0, mode='C')
         self.softmax=nn.Softmax(dim=1)
         self.pool= nn.Sequential(N.conv(c, c, kernel_size=1, padding=0, mode='C'),
             LayerNorm2d(c),
@@ -89,8 +89,8 @@ class GMM(nn.Module):
             N.conv(c,c*2,1,padding=0,bias=False, mode='C'))
 
     def forward(self, rgb, nir):
-        feat_1 = self.conv3_1(rgb)
-        feat_2 = self.conv5_1(nir)
+        feat_1 = self.conv_rgb(rgb)
+        feat_2 = self.conv_nir(nir)
         feat_sum = feat_1 + feat_2
         s = self.pool(feat_sum)
         z = s
