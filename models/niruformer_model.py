@@ -5,7 +5,6 @@ from . import networks as N
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from . import losses as L
 import torch.utils.checkpoint as checkpoint
 from .uformer_layer import DropPath, to_2tuple, trunc_normal_
 import torch.nn.functional as F

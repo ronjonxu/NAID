@@ -59,38 +59,5 @@ class Visualizer():
         print('End of epoch %d / %d (Val) \t Time Taken: %.3f s \t PSNR: %f'
                 % (epoch, total_epoch, time_val, mean_psnr))
 
-    @write_until_success
-    def print_psnr_8(self, epoch, total_epoch, time_val, mean_psnr):
-        self.writer.add_scalar('val/psnr_8', mean_psnr, epoch)
-        print('End of epoch %d / %d (Val) \t Time Taken: %.3f s \t PSNR_8: %f'
-                % (epoch, total_epoch, time_val, mean_psnr))
 
-    @write_until_success
-    def print_psnr_ivif(self, epoch, total_epoch, time_val, mean_psnr_ivif):
-        self.writer.add_scalar('val/psnr_ivif', mean_psnr_ivif, epoch)
-        print('End of epoch %d / %d (Val) \t Time Taken: %.3f s \t PSNR_IVIF: %f'
-                % (epoch, total_epoch, time_val, mean_psnr_ivif))
-
-    @write_until_success
-    def print_ssim_ivif(self, epoch, total_epoch, time_val, mean_ssim_ivif):
-        self.writer.add_scalar('val/ssim_ivif', mean_ssim_ivif, epoch)
-        print('End of epoch %d / %d (Val) \t Time Taken: %.3f s \t SSIM_IVIF: %f'
-                % (epoch, total_epoch, time_val, mean_ssim_ivif))
-
-    @write_until_success
-    def print_en(self, epoch, total_epoch, time_val, mean_en):
-        self.writer.add_scalar('val/en', mean_en, epoch)
-        print('End of epoch %d / %d (Val) \t Time Taken: %.3f s \t EN: %f'
-                % (epoch, total_epoch, time_val, mean_en))
-
-    @write_until_success
-    def print_mi(self, epoch, total_epoch, time_val, mean_mi):
-        self.writer.add_scalar('val/mi', mean_mi, epoch)
-        print('End of epoch %d / %d (Val) \t Time Taken: %.3f s \t MI: %f'
-                % (epoch, total_epoch, time_val, mean_mi))
-
-    @write_until_success
-    def print_scd(self, epoch, total_epoch, time_val, mean_scd):
-        self.writer.add_scalar('val/scd', mean_scd, epoch)
-        print('End of epoch %d / %d (Val) \t Time Taken: %.3f s \t SCD: %f'
-                % (epoch, total_epoch, time_val, mean_scd))
+ 

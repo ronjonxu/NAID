@@ -14,7 +14,7 @@ class RealNAIDDataset(BaseDataset):
         super(RealNAIDDataset, self).__init__(opt, split, dataset_name)
 
         if self.root == '':
-            rootlist = ['/Data/dataset/RealNAID/']
+            rootlist = ['/Data/dataset/Real-NAID/']
             for root in rootlist:
                 if os.path.isdir(root):
                     self.root = root
@@ -100,17 +100,17 @@ class RealNAIDDataset(BaseDataset):
         image_names = []
 
         if split == 'train' :
-            for image_file in os.listdir(dataroot + 'RealNAID/train/input_rgb/'):
+            for image_file in os.listdir(dataroot + 'train/input_rgb/'):
                 image_names.append(image_file)
-                rgb_dirs.append(dataroot + 'RealNAID/trian/input_rgb/' + image_file)
-                ir_dirs.append(dataroot + 'RealNAID/train/input_nir/' + image_file.split('_')[0]+'_nir.png')
-                gt_dirs.append(dataroot + 'RealNAID/train/gt/' +image_file.split('_')[0]+'_gt.png')
+                rgb_dirs.append(dataroot + 'trian/input_rgb/' + image_file)
+                ir_dirs.append(dataroot + 'train/input_nir/' + image_file.split('_')[0]+'_nir.png')
+                gt_dirs.append(dataroot + 'train/gt/' +image_file.split('_')[0]+'_gt.png')
         elif split == 'val'  or split == 'test':
-            for image_file in os.listdir(dataroot + 'RealNAID/test/input_rgb/'):
+            for image_file in os.listdir(dataroot + 'test/input_rgb/'):
                 image_names.append(image_file)
-                rgb_dirs.append(dataroot + 'RealNAID/test/input_rgb/' + image_file)
-                ir_dirs.append(dataroot + 'RealNAID/test/input_nir/' + image_file.split('_')[0]+'_nir.png')
-                gt_dirs.append(dataroot + 'RealNAID/test/gt/' +image_file.split('_')[0]+'_gt.png')
+                rgb_dirs.append(dataroot + 'test/input_rgb/' + image_file)
+                ir_dirs.append(dataroot + 'test/input_nir/' + image_file.split('_')[0]+'_nir.png')
+                gt_dirs.append(dataroot + 'test/gt/' +image_file.split('_')[0]+'_gt.png')
         else:
             raise ValueError
 
