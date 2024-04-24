@@ -67,8 +67,6 @@ if __name__ == '__main__':
             gt = cv2.imread(args.dataroot +  'test/gt/' + image_file[:-9]+'gt.png')[..., ::-1]
             output = cv2.imread(file + '/output/'+ image_file)[..., ::-1]
             metrics[i, 0:3] = calc_metrics(output, gt, loss_fn_alex_v1)
-            f.write(' File %s  :\t PSNR = %.2f, SSIM = %.4f, LPIPS = %.3f \n' 
-                % (image_file, metrics[i, 0], metrics[i, 1], metrics[i, 2]))
             i = i + 1
 
         mean_metrics = np.mean(metrics, axis=0)

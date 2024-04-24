@@ -78,18 +78,12 @@ if __name__ == '__main__':
             
             if label == 1:
                 metrics1[count_1, 0:3] = calc_metrics(output, gt, loss_fn_alex_v1)
-                f1.write(' File %s  :\t PSNR = %.2f, SSIM = %.4f, LPIPS = %.3f \n' 
-                    % (image_file, metrics1[count_1, 0], metrics1[count_1, 1], metrics1[count_1, 2]))
                 count_1 += 1
             elif label == 2:
                 metrics2[count_2, 0:3] = calc_metrics(output, gt, loss_fn_alex_v1)
-                f2.write(' File %s  :\t PSNR = %.2f, SSIM = %.4f, LPIPS = %.3f \n' 
-                    % (image_file, metrics2[count_2, 0], metrics2[count_2, 1], metrics2[count_2, 2]))
                 count_2 += 1
             else:
                 metrics3[count_3, 0:3] = calc_metrics(output, gt, loss_fn_alex_v1)
-                f3.write(' File %s  :\t PSNR = %.2f, SSIM = %.4f, LPIPS = %.3f \n' 
-                    % (image_file, metrics3[count_3, 0], metrics3[count_3, 1], metrics3[count_3, 2]))
                 count_3 += 1
 
             i = i + 1
