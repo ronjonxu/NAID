@@ -101,12 +101,16 @@ class RealNAIDDataset(BaseDataset):
 
         if split == 'train' :
             for image_file in os.listdir(dataroot + 'train/input_rgb/'):
+                if '.DS' in image_file:
+                    continue
                 image_names.append(image_file)
                 rgb_dirs.append(dataroot + 'trian/input_rgb/' + image_file)
                 ir_dirs.append(dataroot + 'train/input_nir/' + image_file.split('_')[0]+'_nir.png')
                 gt_dirs.append(dataroot + 'train/gt/' +image_file.split('_')[0]+'_gt.png')
         elif split == 'val'  or split == 'test':
             for image_file in os.listdir(dataroot + 'test/input_rgb/'):
+                if '.DS' in image_file:
+                    continue
                 image_names.append(image_file)
                 rgb_dirs.append(dataroot + 'test/input_rgb/' + image_file)
                 ir_dirs.append(dataroot + 'test/input_nir/' + image_file.split('_')[0]+'_nir.png')
