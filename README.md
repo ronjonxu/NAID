@@ -35,6 +35,17 @@ Official Code of [NIR-Assisted Image Denoising: A Selective Fusion Approach and 
       journal={arXiv preprint arXiv:2404.08514},
       year={2024},
 }
+
+@ARTICLE{10812783,
+  author={Xu, Rongjian and Zhang, Zhilu and Wu, Renlong and Zuo, Wangmeng},
+  journal={IEEE Transactions on Multimedia}, 
+  title={NIR-Assisted Image Denoising: A Selective Fusion Approach and A Real-World Benchmark Dataset}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={1-13},
+  keywords={Noise;Noise reduction;Noise measurement;Image denoising;Image restoration;Image color analysis;ISO;Hands;Noise level;DVD;NIR-assisted image denoising;Real-world;Dataset},
+  doi={10.1109/TMM.2024.3521833}}
 ```
 
 ## Acknowledement
